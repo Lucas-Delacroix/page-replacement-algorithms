@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Iterable, List
-
+from typing import Iterable, List, Optional
 
 @dataclass(frozen=True)
 class RunResult:
@@ -24,48 +23,47 @@ class RunResult:
 
 @dataclass
 class BenchmarkResult:
-    """
-    Conjunto ordenado de resultados (um por valor de 'frames').
-    A ordem dos itens em 'results' deve corresponder à ordem de 'frames_list' usada.
-    """
+    """Coleção ordenada de RunResult (um por valor de frames)."""
     algo_name: str
     results: List[RunResult]
 
-
-
 class PageReplacementAlgorithm(ABC):
     """
-        Classe base para algoritmos de substituição de páginas.
-        Define a interface que todos os algoritmos devem implementar.
+    Base para algoritmos de substituição de páginas.
+    Contrato:
+      - run(trace, frames) -> RunResult
+      - benchmark(trace, frames_list) -> BenchmarkResult (e atualiza _last_benchmark)
+      - plot() -> None (plota a partir do último benchmark)
     """
 
     def __init__(self, name: str):
         self.name = name
-        self._last_benchmark: BenchmarkResult | None = None
+        self._last_benchmark: Optional[BenchmarkResult] = None
+
+
+    def _normalize_trace(self, trace: Iterable[int]) -> List[int]:
+        """Converte o traço para lista para evitar consumo múltiplo de iteráveis."""
+        return list(trace)
 
 
     @abstractmethod
     def run(self, trace: Iterable[int], frames: int) -> RunResult:
-        """
-        Executa o algoritmo em um traço de referências.
-        Deve retornar métricas como número de faltas, acertos, etc.
-        """
-        pass
+        """Executa o algoritmo em um traço e retorna métricas padronizadas."""
+        ...
 
     @abstractmethod
     def benchmark(self, trace: Iterable[int], frames_list: Iterable[int]) -> BenchmarkResult:
         """
-        Executa 'run' para cada valor de 'frames' em 'frames_list' (na mesma ordem)
-        e retorna um BenchmarkResult com a coleção de RunResult.
-        Também deve atualizar 'self._last_benchmark'.
+        Executa 'run' para cada frames em 'frames_list' (mesma ordem),
+        retorna BenchmarkResult e atualiza self._last_benchmark.
         """
-        pass
+        ...
 
     @abstractmethod
     def plot(self) -> None:
-        """
-        Plota um gráfico usando 'self._last_benchmark'.
-        Implementações podem escolher a métrica (ex.: faults vs frames)
-        ou aceitar um parâmetro adicional em subclasses se necessário.
-        """
+        """Plota um gráfico usando self._last_benchmark."""
         ...
+
+    @property
+    def last_benchmark(self) -> Optional[BenchmarkResult]:
+        return self._last_benchmark
