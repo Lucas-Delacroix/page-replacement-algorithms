@@ -51,13 +51,16 @@ class PageReplacementAlgorithm(ABC):
         """Executa o algoritmo em um traço e retorna métricas padronizadas."""
         ...
 
-    @abstractmethod
     def benchmark(self, trace: Iterable[int], frames_list: Iterable[int]) -> BenchmarkResult:
         """
         Executa 'run' para cada frames em 'frames_list' (mesma ordem),
         retorna BenchmarkResult e atualiza self._last_benchmark.
         """
-        ...
+        seq = self._normalize_trace(trace)
+        results = [self.run(seq, frames) for frames in frames_list]
+        benchmark_result = BenchmarkResult(algo_name=self.name, results=results)
+        self._last_benchmark = benchmark_result
+        return benchmark_result
 
     @abstractmethod
     def plot(self) -> None:
