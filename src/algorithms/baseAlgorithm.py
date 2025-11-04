@@ -56,10 +56,16 @@ class PageReplacementAlgorithm(ABC):
         Executa 'run' para cada frames em 'frames_list' (mesma ordem),
         retorna BenchmarkResult e atualiza self._last_benchmark.
         """
+        print(f"--- Benchmark {self.name} ---")
         seq = self._normalize_trace(trace)
         results = [self.run(seq, frames) for frames in frames_list]
         benchmark_result = BenchmarkResult(algo_name=self.name, results=results)
         self._last_benchmark = benchmark_result
+        for r in benchmark_result.results:
+            print(
+                f"Frames = {r.frames:2d} | Faults = {r.faults:2d} | Hits = {r.hits:2d} "
+                f"| HitRate = {r.hit_rate:.2f} | FaultRate = {r.fault_rate:.2f}"
+            )
         return benchmark_result
 
     @abstractmethod
