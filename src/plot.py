@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from typing import List
 
-from src.baseAlgorithm import BenchmarkResult
+from src.algorithms.baseAlgorithm import BenchmarkResult
 
 def plot_faults(benchmarks: List[BenchmarkResult]) -> None:
     plt.figure()
