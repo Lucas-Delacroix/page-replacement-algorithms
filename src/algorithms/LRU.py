@@ -4,9 +4,9 @@ from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
 from src.core import Access, PTE
 import matplotlib.pyplot as plt
 
-class Clock(PageReplacementAlgorithm):
+class LRU(PageReplacementAlgorithm):
     def __init__(self):
-        super().__init__("clock")
+        super().__init__("LRU")
 
     def run(self, trace: Iterable[Access], frames: int) -> RunResult:
         if frames <= 0:
@@ -34,7 +34,7 @@ class Clock(PageReplacementAlgorithm):
 
         faults = hits = evictions = 0
 
-        time = 0
+        time: int = 0
 
         for acc in seq:
             pte: PTE = page_table[acc.page_id]
@@ -44,17 +44,18 @@ class Clock(PageReplacementAlgorithm):
                 pte.R = 1
                 if acc.write:
                     pte.M = 1
-                pte.last_used = time
+                pte.last_used = acc.t
                 continue
 
             faults += 1
+
 
             if len(frames_list) < frames:
                 pte.frame = len(frames_list)
                 pte.R = 1
                 pte.M = int(acc.write)
-                pte.loaded_at = time
-                pte.last_used = time
+                pte.loaded_at = acc.t
+                pte.last_used = acc.t
 
                 frames_list.append(pte)
                 continue
@@ -73,8 +74,8 @@ class Clock(PageReplacementAlgorithm):
                     pte.frame = pointer
                     pte.R = 1
                     pte.M = int(acc.write)
-                    pte.loaded_at = time
-                    pte.last_used = time
+                    pte.loaded_at = acc.t
+                    pte.last_used = acc.t
 
                     frames_list[pointer] = pte
 
