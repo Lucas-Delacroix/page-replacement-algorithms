@@ -1,30 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Iterable, List, Optional
-from src.access import Access
-
-@dataclass(frozen=True)
-class RunResult:
-    algo_name: str
-    frames: int
-    trace_len: int
-    faults: int
-    hits: int
-    evictions: int
-
-    @property
-    def hit_rate(self) -> float:
-        return self.hits / self.trace_len if self.trace_len else 0.0
-
-    @property
-    def fault_rate(self) -> float:
-        return self.faults / self.trace_len if self.trace_len else 0.0
-
-
-@dataclass
-class BenchmarkResult:
-    algo_name: str
-    results: List[RunResult]
+from src.core import BenchmarkResult, Access, RunResult
 
 
 class PageReplacementAlgorithm(ABC):
@@ -55,10 +31,10 @@ class PageReplacementAlgorithm(ABC):
         results = [self.run(seq, frames) for frames in frames_list]
         br = BenchmarkResult(algo_name=self.name, results=results)
         self._last_benchmark = br
-        for r in br.results:
+        for result in br.results:
             print(
-                f"Frames = {r.frames:2d} | Faults = {r.faults:2d} | Hits = {r.hits:2d} "
-                f"| HitRate = {r.hit_rate:.2f} | FaultRate = {r.fault_rate:.2f}"
+                f"Frames = {result.frames:2d} | Faults = {result.faults:2d} | Hits = {result.hits:2d} "
+                f"| HitRate = {result.hit_rate:.2f} | FaultRate = {result.fault_rate:.2f}"
             )
         return br
 
