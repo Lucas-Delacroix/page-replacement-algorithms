@@ -1,54 +1,60 @@
-from collections import deque
-from typing import Iterable, Set
+from __future__ import annotations
 import matplotlib.pyplot as plt
+from collections import deque
+from typing import Dict, Iterable, List
+from src.algorithms.baseAlgorithm import PageReplacementAlgorithm
+from src.core import Access, RunResult, PTE
 
-from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
-from src.access import Access
 
 class Fifo(PageReplacementAlgorithm):
     def __init__(self):
         super().__init__("FIFO")
 
     def run(self, trace: Iterable[Access], frames: int) -> RunResult:
+        seq: List[Access] = list(trace)
         if frames <= 0:
-            raise ValueError("frames must be greater than 0")
+            raise ValueError("frames deve ser > 0")
 
-        seq = self._normalize_trace(trace)
-        q = deque()
-        in_mem: Set[int] = set()
+        page_table: Dict[int, PTE] = {}
+        free_frames = deque(range(frames))
+        fifo_queue = deque()
 
         faults = hits = evictions = 0
-        trace_len = 0
 
-        for acc in seq:
-            trace_len += 1
-            pid = acc.page.id
+        for a in seq:
+            pid = a.page_id
 
-            if pid in in_mem:
+            if pid in page_table:
                 hits += 1
-                continue
-
-            faults += 1
-            if len(q) < frames:
-                q.append(pid)
-                in_mem.add(pid)
+                pte = page_table[pid]
+                pte.R = 1
+                if a.write:
+                    pte.M = 1
             else:
-                old = q.popleft()
-                in_mem.remove(old)
-                evictions += 1
-                q.append(pid)
-                in_mem.add(pid)
+                faults += 1
+
+                if free_frames:
+                    f = free_frames.popleft()
+                else:
+                    victim_pid = fifo_queue.popleft()
+                    victim = page_table.pop(victim_pid)
+                    evictions += 1
+                    f = victim.frame
+
+                pte = PTE(page_id=pid, frame=f, R=1, M=1 if a.write else 0, loaded_at=a.t, last_used=a.t)
+                page_table[pid] = pte
+                fifo_queue.append(pid)
 
         return RunResult(
             algo_name=self.name,
             frames=frames,
-            trace_len=trace_len,
+            trace_len=len(seq),
             faults=faults,
             hits=hits,
             evictions=evictions,
         )
 
-    def plot(self, save_path: str | None = None, show: bool = True) -> None:
+    def plot(self, save_path: str | None = None, show: bool = False) -> None:
         if self._last_benchmark is None:
             raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
 

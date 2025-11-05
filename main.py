@@ -1,24 +1,19 @@
-from src.page import Page
-from src.access import Access
+from src.core import Access
 from src.algorithms.fifo import Fifo
-from src.plot import plot_comparison
 
-def make_trace():
-    p1, p2, p3, p4, p5 = Page(1), Page(2), Page(3), Page(4), Page(5)
-    return [
-        Access(p1), Access(p2), Access(p3), Access(p4),
-        Access(p1, bit_r=1), Access(p2, bit_r=1),
-        Access(p5), Access(p1),
-        Access(p2), Access(p3), Access(p4), Access(p5, bit_m=1),
-    ]
+def make_sample_trace():
+    pages = [1, 2, 3, 2, 4, 1, 5, 2, 1, 2, 3, 4, 5]
+    writes = {4, 7, 11}
+    return [Access(page_id=pid, write=(i in writes), t=i) for i, pid in enumerate(pages)]
 
 def main():
-    trace = make_trace()
-    frames_list = [2, 3, 4, 5]
+    trace = make_sample_trace()
+    frames_list = [2, 3, 4]
 
-    fifo = Fifo()
-    br_fifo = fifo.benchmark(trace, frames_list)
-    fifo.plot(save_path="fifo.png", show=False)
+    algos = [Fifo()]
+    for algo in algos:
+        br = algo.benchmark(trace, frames_list)
+        algo.plot(f"{algo.name}.png")
 
 if __name__ == "__main__":
     main()
