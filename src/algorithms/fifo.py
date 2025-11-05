@@ -1,40 +1,43 @@
 from collections import deque
-from typing import Iterable, List
+from typing import Iterable, Set
 import matplotlib.pyplot as plt
-from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult, BenchmarkResult
 
+from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
+from src.access import Access
 
 class Fifo(PageReplacementAlgorithm):
     def __init__(self):
         super().__init__("FIFO")
 
-    def run(self, trace: Iterable[int], frames: int) -> RunResult:
+    def run(self, trace: Iterable[Access], frames: int) -> RunResult:
         if frames <= 0:
             raise ValueError("frames must be greater than 0")
+
+        seq = self._normalize_trace(trace)
         q = deque()
-        in_mem = set()
+        in_mem: Set[int] = set()
+
         faults = hits = evictions = 0
         trace_len = 0
 
-        for page in trace:
+        for acc in seq:
             trace_len += 1
+            pid = acc.page.id
 
-            if page in in_mem:
+            if pid in in_mem:
                 hits += 1
                 continue
 
             faults += 1
-
             if len(q) < frames:
-                q.append(page)
-                in_mem.add(page)
-
+                q.append(pid)
+                in_mem.add(pid)
             else:
                 old = q.popleft()
                 in_mem.remove(old)
                 evictions += 1
-                q.append(page)
-                in_mem.add(page)
+                q.append(pid)
+                in_mem.add(pid)
 
         return RunResult(
             algo_name=self.name,
@@ -45,11 +48,7 @@ class Fifo(PageReplacementAlgorithm):
             evictions=evictions,
         )
 
-    def plot(self, save_path: str | None = True, show: bool = False) -> None:
-        """
-        Plot simples: Faltas de página × Frames usando o último benchmark.
-        Use suas funções externas para comparar múltiplos algoritmos.
-        """
+    def plot(self, save_path: str | None = None, show: bool = True) -> None:
         if self._last_benchmark is None:
             raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
 
@@ -73,4 +72,3 @@ class Fifo(PageReplacementAlgorithm):
             plt.show()
         else:
             plt.close()
-

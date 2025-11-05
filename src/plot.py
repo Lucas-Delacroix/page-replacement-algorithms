@@ -1,74 +1,50 @@
 import matplotlib.pyplot as plt
 from typing import List
-
 from src.algorithms.baseAlgorithm import BenchmarkResult
 
-def plot_faults(benchmarks: List[BenchmarkResult]) -> None:
-    plt.figure()
+def _plot_many(benchmarks: List[BenchmarkResult], metric: str, title: str):
+    fig, ax = plt.subplots()
     for br in benchmarks:
         frames = [r.frames for r in br.results]
-        faults = [r.faults for r in br.results]
-        plt.plot(frames, faults, marker="o", label=br.algo_name)
-    plt.xlabel("Frames")
-    plt.ylabel("Faltas de página")
-    plt.title("Comparação — Faltas de página")
-    plt.legend()
-    plt.grid(True, linestyle="--", linewidth=0.5)
+        if metric == "faults":
+            ys = [r.faults for r in br.results]
+        elif metric == "hits":
+            ys = [r.hits for r in br.results]
+        elif metric == "fault_rate":
+            ys = [r.fault_rate for r in br.results]
+        elif metric == "hit_rate":
+            ys = [r.hit_rate for r in br.results]
+        else:
+            raise ValueError("Métrica inválida. Use faults/hits/fault_rate/hit_rate.")
+        ax.plot(frames, ys, marker="o", label=br.algo_name)
+
+    ax.set_xlabel("Frames")
+    ylabels = {
+        "faults": "Faltas de página",
+        "hits": "Acertos de página",
+        "fault_rate": "Taxa de faltas",
+        "hit_rate": "Taxa de acertos",
+    }
+    ax.set_ylabel(ylabels[metric])
+    ax.set_title(title)
+    ax.grid(True, linestyle="--", linewidth=0.5)
+    ax.legend()
     plt.tight_layout()
     plt.show()
 
+def plot_faults(benchmarks: List[BenchmarkResult]) -> None:
+    _plot_many(benchmarks, "faults", "Comparação — Faltas de página")
 
 def plot_hits(benchmarks: List[BenchmarkResult]) -> None:
-    plt.figure()
-    for br in benchmarks:
-        frames = [r.frames for r in br.results]
-        hits = [r.hits for r in br.results]
-        plt.plot(frames, hits, marker="o", label=br.algo_name)
-    plt.xlabel("Frames")
-    plt.ylabel("Acertos de página")
-    plt.title("Comparação — Acertos de página")
-    plt.legend()
-    plt.grid(True, linestyle="--", linewidth=0.5)
-    plt.tight_layout()
-    plt.show()
-
+    _plot_many(benchmarks, "hits", "Comparação — Acertos de página")
 
 def plot_fault_rate(benchmarks: List[BenchmarkResult]) -> None:
-    plt.figure()
-    for br in benchmarks:
-        frames = [r.frames for r in br.results]
-        rates = [r.fault_rate for r in br.results]
-        plt.plot(frames, rates, marker="o", label=br.algo_name)
-    plt.xlabel("Frames")
-    plt.ylabel("Taxa de faltas")
-    plt.title("Comparação — Taxa de faltas")
-    plt.legend()
-    plt.grid(True, linestyle="--", linewidth=0.5)
-    plt.tight_layout()
-    plt.show()
-
+    _plot_many(benchmarks, "fault_rate", "Comparação — Taxa de faltas")
 
 def plot_hit_rate(benchmarks: List[BenchmarkResult]) -> None:
-    plt.figure()
-    for br in benchmarks:
-        frames = [r.frames for r in br.results]
-        rates = [r.hit_rate for r in br.results]
-        plt.plot(frames, rates, marker="o", label=br.algo_name)
-    plt.xlabel("Frames")
-    plt.ylabel("Taxa de acertos")
-    plt.title("Comparação — Taxa de acertos")
-    plt.legend()
-    plt.grid(True, linestyle="--", linewidth=0.5)
-    plt.tight_layout()
-    plt.show()
-
+    _plot_many(benchmarks, "hit_rate", "Comparação — Taxa de acertos")
 
 def plot_comparison(benchmarks: List[BenchmarkResult], metric: str = "faults") -> None:
-    """
-    Plota a comparação de N algoritmos no mesmo gráfico.
-    :param benchmarks: lista de BenchmarkResult (um para cada algoritmo)
-    :param metric: "faults", "hits", "fault_rate" ou "hit_rate"
-    """
     if metric == "faults":
         plot_faults(benchmarks)
     elif metric == "hits":
