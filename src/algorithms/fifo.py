@@ -31,7 +31,7 @@ class Fifo(PageReplacementAlgorithm):
 
             else:
                 old = q.popleft()
-                in_mem.add(old)
+                in_mem.remove(old)
                 evictions += 1
                 q.append(page)
                 in_mem.add(page)
