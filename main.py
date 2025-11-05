@@ -1,3 +1,4 @@
+from src.algorithms.second_chance import SecondChance
 from src.core import Access
 from src.algorithms.fifo import Fifo
 
@@ -10,7 +11,7 @@ def main():
     trace = make_sample_trace()
     frames_list = [2, 3, 4]
 
-    algos = [Fifo()]
+    algos = [Fifo(), SecondChance()]
     for algo in algos:
         br = algo.benchmark(trace, frames_list)
         algo.plot(f"{algo.name}.png")

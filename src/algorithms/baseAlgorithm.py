@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, List, Optional
 from src.core import BenchmarkResult, Access, RunResult
+import os
+import matplotlib.pyplot as plt
 
 
 class PageReplacementAlgorithm(ABC):
@@ -38,9 +40,32 @@ class PageReplacementAlgorithm(ABC):
             )
         return br
 
-    @abstractmethod
-    def plot(self, *args, **kwargs) -> None:
-        ...
+    def plot(self, save_path: str | None = None, show: bool = False) -> None:
+        os.makedirs("results", exist_ok=True)
+        save_path = f"results/{save_path}"
+        if self._last_benchmark is None:
+            raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
+
+        frames = [r.frames for r in self._last_benchmark.results]
+        faults = [r.faults for r in self._last_benchmark.results]
+
+        plt.figure()
+        plt.plot(frames, faults, marker="o", label=self._last_benchmark.algo_name)
+        plt.xlabel("Frames")
+        plt.ylabel("Faltas de página")
+        plt.title(f"{self.name} — Faltas de página")
+        plt.grid(True, linestyle="--", linewidth=0.5)
+        plt.legend()
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+            print(f"Gráfico salvo em: {save_path}")
+
+        if show:
+            plt.show()
+        else:
+            plt.close()
 
     @property
     def last_benchmark(self) -> Optional[BenchmarkResult]:
