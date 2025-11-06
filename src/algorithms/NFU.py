@@ -28,7 +28,6 @@ class NFU(PageReplacementAlgorithm):
             for pid in all_pages
         }
 
-        # Adiciona campo auxiliar para contagem de acessos
         usage_counter: Dict[int, int] = {pid: 0 for pid in all_pages}
 
         frames_list: List[PTE] = []
@@ -39,7 +38,6 @@ class NFU(PageReplacementAlgorithm):
             time += 1
             pte = page_table[acc.page_id]
 
-            # Caso de HIT
             if pte.frame is not None:
                 hits += 1
                 pte.R = 1
