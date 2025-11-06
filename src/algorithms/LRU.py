@@ -70,6 +70,7 @@ class LRU(PageReplacementAlgorithm):
             pte.loaded_at = time
             pte.last_used = time
             frames_list.append(pte)
+            time += 1
 
         return RunResult(
             algo_name=self.name,
