@@ -1,5 +1,4 @@
 from typing import Iterable, Set, Dict, List
-from baseAlgorithm import PageReplacementAlgorithm
 from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
 from src.core import Access, PTE
 import matplotlib.pyplot as plt
@@ -30,7 +29,6 @@ class LRU(PageReplacementAlgorithm):
 
 
         frames_list: List[PTE] = []
-        pointer: int = 0
 
         faults = hits = evictions = 0
 
@@ -44,46 +42,34 @@ class LRU(PageReplacementAlgorithm):
                 pte.R = 1
                 if acc.write:
                     pte.M = 1
-                pte.last_used = acc.t
+                pte.last_used = time
                 continue
 
             faults += 1
-
 
             if len(frames_list) < frames:
                 pte.frame = len(frames_list)
                 pte.R = 1
                 pte.M = int(acc.write)
-                pte.loaded_at = acc.t
-                pte.last_used = acc.t
+                pte.loaded_at = time
+                pte.last_used = time
 
                 frames_list.append(pte)
                 continue
 
+            victim = min(frames_list, key=lambda x: x.last_used)
+            evictions += 1
 
-            while True:
-                current = frames_list[pointer]
+            victim_frame = victim.frame
+            frames_list.remove(victim)
+            victim.frame = None
 
-                if current.R == 0:
-                    evictions += 1
-
-                    current.frame = None
-                    current.R = 0
-                    current.M = 0
-
-                    pte.frame = pointer
-                    pte.R = 1
-                    pte.M = int(acc.write)
-                    pte.loaded_at = acc.t
-                    pte.last_used = acc.t
-
-                    frames_list[pointer] = pte
-
-                    pointer = (pointer + 1) % frames
-                    break
-                else:
-                    current.R = 0
-                    pointer = (pointer + 1) % frames
+            pte.frame = victim_frame
+            pte.R = 1
+            pte.M = int(acc.write)
+            pte.loaded_at = time
+            pte.last_used = time
+            frames_list.append(pte)
 
         return RunResult(
             algo_name=self.name,
@@ -93,28 +79,3 @@ class LRU(PageReplacementAlgorithm):
             hits=hits,
             evictions=evictions,
         )
-    
-    def plot(self, save_path: str | None = None, show: bool = False) -> None:
-        if self._last_benchmark is None:
-            raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
-
-        frames = [r.frames for r in self._last_benchmark.results]
-        faults = [r.faults for r in self._last_benchmark.results]
-
-        plt.figure()
-        plt.plot(frames, faults, marker="o", label=self._last_benchmark.algo_name)
-        plt.xlabel("Frames")
-        plt.ylabel("Faltas de página")
-        plt.title(f"{self.name.upper()} — Faltas de página")
-        plt.grid(True, linestyle="--", linewidth=0.5)
-        plt.legend()
-        plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300)
-            print(f"Gráfico salvo em: {save_path}")
-
-        if show:
-            plt.show()
-        else:
-            plt.close()
