@@ -32,7 +32,7 @@ def _plot_many(
         else:
             raise ValueError("Métrica inválida. Use faults/hits/fault_rate/hit_rate.")
 
-        y_offset = (i * 0.0015) * max(ys) if max(ys) != 0 else 0
+        y_offset = (i * 0.0009) * max(ys) if max(ys) != 0 else 0
         ys = [y + y_offset for y in ys]
 
         ax.plot(

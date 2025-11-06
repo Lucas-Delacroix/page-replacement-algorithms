@@ -12,7 +12,7 @@ from src.core import make_random_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
 
 def main():
-    trace, frames_list = make_random_trace(num_pages=50, frames=None, frame_mode="auto", seed=42)
+    trace, frames_list = make_random_trace(num_pages=15, frames=None, frame_mode="auto", seed=42)
 
     algos = [
         Fifo(),

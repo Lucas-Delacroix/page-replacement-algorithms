@@ -41,8 +41,8 @@ class PageReplacementAlgorithm(ABC):
         return br
 
     def plot(self, save_path: str | None = None, show: bool = False) -> None:
-        os.makedirs("results", exist_ok=True)
-        save_path = f"results/{save_path}"
+        os.makedirs("results/single", exist_ok=True)
+        save_path = f"results/single/{save_path}"
         if self._last_benchmark is None:
             raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
 
