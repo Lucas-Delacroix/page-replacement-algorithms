@@ -10,10 +10,16 @@ def _plot_many(
     save_path: Optional[str] = None,
     show: bool = True,
 ):
-    os.makedirs("results", exist_ok=True)
-    save_path = f"results/{save_path}"
+    os.makedirs("results/comparison", exist_ok=True)
+    if save_path:
+        save_path = f"results/comparison/{save_path}"
+
     fig, ax = plt.subplots()
-    for br in benchmarks:
+
+    markers = ['o', 's', 'D', '^', 'v', '<', '>', 'x', '*', 'p']
+    linestyles = ['-', '--', '-.', ':']
+
+    for i, br in enumerate(benchmarks):
         frames = [r.frames for r in br.results]
         if metric == "faults":
             ys = [r.faults for r in br.results]
@@ -25,7 +31,18 @@ def _plot_many(
             ys = [r.hit_rate for r in br.results]
         else:
             raise ValueError("Métrica inválida. Use faults/hits/fault_rate/hit_rate.")
-        ax.plot(frames, ys, marker="o", label=br.algo_name)
+
+        y_offset = (i * 0.0015) * max(ys) if max(ys) != 0 else 0
+        ys = [y + y_offset for y in ys]
+
+        ax.plot(
+            frames,
+            ys,
+            marker=markers[i % len(markers)],
+            linestyle=linestyles[i % len(linestyles)],
+            linewidth=1.8,
+            label=br.algo_name,
+        )
 
     ax.set_xlabel("Frames")
     ylabels = {
@@ -37,8 +54,8 @@ def _plot_many(
     ax.set_ylabel(ylabels[metric])
     ax.set_title(title)
     ax.grid(True, linestyle="--", linewidth=0.5)
-    ax.legend()
-    plt.tight_layout()
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
 
     if save_path:
         plt.savefig(save_path, dpi=300)
@@ -48,6 +65,7 @@ def _plot_many(
         plt.show()
     else:
         plt.close()
+
 
 def plot_faults(benchmarks: List[BenchmarkResult], show: bool = False) -> None:
     _plot_many(benchmarks, "faults", "Comparação — Faltas de página", "faults", show)
