@@ -1,5 +1,4 @@
 from typing import Iterable, Set, Dict, List
-from baseAlgorithm import PageReplacementAlgorithm
 from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
 from src.core import Access, PTE
 import matplotlib.pyplot as plt

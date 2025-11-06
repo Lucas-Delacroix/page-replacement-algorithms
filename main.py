@@ -1,3 +1,5 @@
+from src.algorithms.LRU import LRU
+from src.algorithms.NFU import NFU
 from src.algorithms.second_chance import SecondChance
 from src.core import Access, make_random_trace
 from src.algorithms.fifo import Fifo
@@ -9,7 +11,7 @@ def main():
     trace, frames_list = make_random_trace(num_pages=50, frames=None, frame_mode="auto", seed=42)
 
     benchmarks = []
-    algos = [Fifo(), SecondChance(), Clock()]
+    algos = [Fifo(), SecondChance(), Clock(), NFU(), LRU()]
     for algo in algos:
         br = algo.benchmark(trace, frames_list)
         benchmarks.append(br)
