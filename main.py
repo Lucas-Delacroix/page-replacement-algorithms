@@ -1,18 +1,13 @@
 from src.algorithms.second_chance import SecondChance
-from src.core import Access
+from src.core import Access, make_random_trace
 from src.algorithms.fifo import Fifo
 from src.algorithms.clock import Clock
 from src.plot import *
 
 
-def make_sample_trace():
-    pages = [1, 2, 3, 2, 4, 1, 5, 2, 1, 2, 3, 4, 5]
-    writes = {4, 7, 11}
-    return [Access(page_id=pid, write=(i in writes), t=i) for i, pid in enumerate(pages)]
-
 def main():
-    trace = make_sample_trace()
-    frames_list = [2, 3, 4]
+    trace, frames_list = make_random_trace(num_pages=50, frames=None, frame_mode="auto", seed=42)
+
     benchmarks = []
     algos = [Fifo(), SecondChance(), Clock()]
     for algo in algos:
