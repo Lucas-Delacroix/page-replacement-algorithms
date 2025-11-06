@@ -14,7 +14,7 @@ def _plot_many(
     if save_path:
         save_path = f"results/comparison/{save_path}"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(16, 6))
 
     markers = ['o', 's', 'D', '^', 'v', '<', '>', 'x', '*', 'p']
     linestyles = ['-', '--', '-.', ':']
@@ -45,16 +45,22 @@ def _plot_many(
         )
 
     ax.set_xlabel("Frames")
-    ylabels = {
-        "faults": "Faltas de página",
-        "hits": "Acertos de página",
-        "fault_rate": "Taxa de faltas",
-        "hit_rate": "Taxa de acertos",
-    }
-    ax.set_ylabel(ylabels[metric])
+    ax.set_ylabel({
+                      "faults": "Faltas de página",
+                      "hits": "Acertos de página",
+                      "fault_rate": "Taxa de faltas",
+                      "hit_rate": "Taxa de acertos",
+                  }[metric])
     ax.set_title(title)
     ax.grid(True, linestyle="--", linewidth=0.5)
-    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    # ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    ax.legend(
+        loc="best",
+        framealpha=0.8,
+        facecolor="white",
+        fontsize=9,
+    )
+
     plt.tight_layout(rect=[0, 0, 0.85, 1])
 
     if save_path:
