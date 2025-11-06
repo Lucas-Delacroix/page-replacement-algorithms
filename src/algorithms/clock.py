@@ -1,7 +1,6 @@
 from typing import Iterable, Set, Dict, List
-from baseAlgorithm import PageReplacementAlgorithm
-from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
-from src.core import Access, PTE
+from src.algorithms.baseAlgorithm import PageReplacementAlgorithm
+from src.core import Access, PTE, RunResult
 import matplotlib.pyplot as plt
 
 class Clock(PageReplacementAlgorithm):
@@ -59,7 +58,6 @@ class Clock(PageReplacementAlgorithm):
                 frames_list.append(pte)
                 continue
 
-
             while True:
                 current = frames_list[pointer]
 
@@ -94,28 +92,3 @@ class Clock(PageReplacementAlgorithm):
             hits=hits,
             evictions=evictions,
         )
-    
-    def plot(self, save_path: str | None = None, show: bool = False) -> None:
-        if self._last_benchmark is None:
-            raise RuntimeError("Sem benchmark: chame benchmark() antes de plot().")
-
-        frames = [r.frames for r in self._last_benchmark.results]
-        faults = [r.faults for r in self._last_benchmark.results]
-
-        plt.figure()
-        plt.plot(frames, faults, marker="o", label=self._last_benchmark.algo_name)
-        plt.xlabel("Frames")
-        plt.ylabel("Faltas de página")
-        plt.title(f"{self.name.upper()} — Faltas de página")
-        plt.grid(True, linestyle="--", linewidth=0.5)
-        plt.legend()
-        plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300)
-            print(f"Gráfico salvo em: {save_path}")
-
-        if show:
-            plt.show()
-        else:
-            plt.close()
