@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class Clock(PageReplacementAlgorithm):
     def __init__(self):
-        super().__init__("clock")
+        super().__init__("Clock")
 
     def run(self, trace: Iterable[Access], frames: int) -> RunResult:
         if frames <= 0:
@@ -83,6 +83,8 @@ class Clock(PageReplacementAlgorithm):
                 else:
                     current.R = 0
                     pointer = (pointer + 1) % frames
+                time += 1
+            time += 1
 
         return RunResult(
             algo_name=self.name,

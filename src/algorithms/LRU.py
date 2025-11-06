@@ -30,7 +30,6 @@ class LRU(PageReplacementAlgorithm):
 
 
         frames_list: List[PTE] = []
-        pointer: int = 0
 
         faults = hits = evictions = 0
 
@@ -44,46 +43,35 @@ class LRU(PageReplacementAlgorithm):
                 pte.R = 1
                 if acc.write:
                     pte.M = 1
-                pte.last_used = acc.t
+                pte.last_used = time
                 continue
 
             faults += 1
-
 
             if len(frames_list) < frames:
                 pte.frame = len(frames_list)
                 pte.R = 1
                 pte.M = int(acc.write)
-                pte.loaded_at = acc.t
-                pte.last_used = acc.t
+                pte.loaded_at = time
+                pte.last_used = time
 
                 frames_list.append(pte)
                 continue
 
+            victim = min_manual(frames_list, key=lambda x: x.last_used)
+            evictions += 1
 
-            while True:
-                current = frames_list[pointer]
+            victim_frame = victim.frame
+            frames_list.remove(victim)
+            victim.frame = None
 
-                if current.R == 0:
-                    evictions += 1
+            pte.frame = victim_frame
+            pte.R = 1
+            pte.M = int(acc.write)
+            pte.loaded_at = time
+            pte.last_used = time
+            frames_list.append(pte)
 
-                    current.frame = None
-                    current.R = 0
-                    current.M = 0
-
-                    pte.frame = pointer
-                    pte.R = 1
-                    pte.M = int(acc.write)
-                    pte.loaded_at = acc.t
-                    pte.last_used = acc.t
-
-                    frames_list[pointer] = pte
-
-                    pointer = (pointer + 1) % frames
-                    break
-                else:
-                    current.R = 0
-                    pointer = (pointer + 1) % frames
 
         return RunResult(
             algo_name=self.name,
@@ -118,3 +106,21 @@ class LRU(PageReplacementAlgorithm):
             plt.show()
         else:
             plt.close()
+
+def min_manual(frames_list, key=lambda x: x):
+    """Retorna o elemento mínimo de frames_list com base em key (implementação manual de min)."""
+    if not frames_list:
+        raise ValueError("frames_list está vazia")
+
+    menor = frames_list[0]
+    menor_valor = key(menor)
+
+    time = 0
+    for item in frames_list[1:]:
+        time += 1
+        valor = key(item)
+        if valor < menor_valor:
+            menor = item
+            menor_valor = valor
+
+    return menor, time
