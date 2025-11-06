@@ -6,6 +6,8 @@ from src.algorithms.clock import Clock
 from src.algorithms.nru import NRU
 from src.algorithms.working_set import WorkingSet
 from src.algorithms.wsclock import WSClock
+from src.algorithms.Aging import Aging
+from src.algorithms.Optimal import Optimal
 from src.core import make_random_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
 
@@ -21,6 +23,8 @@ def main():
         NRU(),
         WorkingSet(window=4),
         WSClock(window=4),
+        Optimal(),
+        Aging(bits=8, refresh_every=1)
     ]
     benchmarks = []
     for algo in algos:
