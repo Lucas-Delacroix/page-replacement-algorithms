@@ -4,9 +4,9 @@ from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
 from src.core import Access, PTE
 import matplotlib.pyplot as plt
 
-class LRU(PageReplacementAlgorithm):
+class NFU(PageReplacementAlgorithm):
     def __init__(self):
-        super().__init__("LRU")
+        super().__init__("NFU")
 
     def run(self, trace: Iterable[Access], frames: int) -> RunResult:
         if frames <= 0:
@@ -23,26 +23,29 @@ class LRU(PageReplacementAlgorithm):
                 R=0,
                 M=0,
                 loaded_at=None,
-                last_used=None,
+                last_used=None
             )
             for pid in all_pages
         }
 
+        # Adiciona campo auxiliar para contagem de acessos
+        usage_counter: Dict[int, int] = {pid: 0 for pid in all_pages}
 
         frames_list: List[PTE] = []
-
         faults = hits = evictions = 0
-
-        time: int = 0
+        time = 0
 
         for acc in seq:
-            pte: PTE = page_table[acc.page_id]
+            time += 1
+            pte = page_table[acc.page_id]
 
+            # Caso de HIT
             if pte.frame is not None:
                 hits += 1
                 pte.R = 1
                 if acc.write:
                     pte.M = 1
+                usage_counter[pte.page_id] += 1
                 pte.last_used = time
                 continue
 
@@ -54,11 +57,11 @@ class LRU(PageReplacementAlgorithm):
                 pte.M = int(acc.write)
                 pte.loaded_at = time
                 pte.last_used = time
-
+                usage_counter[pte.page_id] = 1
                 frames_list.append(pte)
                 continue
 
-            victim = min(frames_list, key=lambda x: x.last_used)
+            victim = min(frames_list, key=lambda x: usage_counter[x.page_id])
             evictions += 1
 
             victim_frame = victim.frame
@@ -70,6 +73,7 @@ class LRU(PageReplacementAlgorithm):
             pte.M = int(acc.write)
             pte.loaded_at = time
             pte.last_used = time
+            usage_counter[pte.page_id] = 1
             frames_list.append(pte)
 
         return RunResult(
