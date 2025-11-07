@@ -8,13 +8,21 @@ from src.algorithms.working_set import WorkingSet
 from src.algorithms.wsclock import WSClock
 from src.algorithms.Aging import Aging
 from src.algorithms.Optimal import Optimal
-from src.core import make_random_trace
+from src.core import make_random_trace, make_locality_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
 from src.reports import export_benchmark_csv
 
 
 def main():
-    trace, frames_list = make_random_trace(num_pages=15, frames=None, frame_mode="auto", seed=42)
+    trace, frames_list = make_random_trace(num_pages=35, frames=None, frame_mode="auto", seed=42)
+    trace, frames_list = make_locality_trace(
+        num_pages=60,
+        trace_length=500,
+        locality_prob=0.85,
+        phase_length=60,
+        working_set_size=8,
+        seed=42,
+    )
 
     algos = [
         Fifo(),

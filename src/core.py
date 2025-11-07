@@ -3,6 +3,71 @@ from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Union, Tuple
 import random
 
+
+def make_locality_trace(
+    num_pages: int = 30,
+    trace_length: int = 200,
+    write_prob: float = 0.3,
+    locality_prob: float = 0.8,
+    phase_length: int = 40,
+    working_set_size: int = 5,
+    seed: Optional[int] = None,
+) -> Tuple[List[Access], List[int]]:
+    """
+    Gera um traço com LOCALIDADE DE REFERÊNCIA.
+
+    - Em cada fase, escolhe um subconjunto 'hot' de páginas (working set).
+    - Com probabilidade 'locality_prob', acessa uma página desse subconjunto.
+    - Com probabilidade (1 - locality_prob), acessa qualquer página do universo.
+
+    Isso modela bem o comportamento de programas reais: usam um conjunto pequeno
+    de páginas por um tempo, depois mudam para outro conjunto.
+    """
+
+    if num_pages < 1:
+        raise ValueError("num_pages deve ser >= 1.")
+    if trace_length <= 0:
+        raise ValueError("trace_length deve ser > 0.")
+    if not (0.0 <= write_prob <= 1.0):
+        raise ValueError("write_prob deve estar em [0.0, 1.0].")
+    if not (0.0 <= locality_prob <= 1.0):
+        raise ValueError("locality_prob deve estar em [0.0, 1.0].")
+    if working_set_size < 1 or working_set_size > num_pages:
+        raise ValueError("working_set_size deve estar em [1, num_pages].")
+    if phase_length < 1:
+        raise ValueError("phase_length deve ser >= 1.")
+
+    if seed is not None:
+        random.seed(seed)
+
+    pages = list(range(1, num_pages + 1))
+    trace: List[Access] = []
+
+    current_phase_start = 0
+    current_ws = random.sample(pages, working_set_size)
+
+    for t in range(trace_length):
+        if (t - current_phase_start) >= phase_length:
+            current_phase_start = t
+            current_ws = random.sample(pages, working_set_size)
+
+        if random.random() < locality_prob:
+            pid = random.choice(current_ws)
+        else:
+            pid = random.choice(pages)
+
+        write = random.random() < write_prob
+        trace.append(Access(page_id=pid, write=write, t=t))
+
+    min_f = max(1, num_pages // 5)
+    max_f = max(min_f + 1, (num_pages * 4) // 5 or 1)
+    step = max(1, (max_f - min_f) // 4)
+    frames_list = list(range(min_f, max_f + 1, step))
+    if frames_list[-1] != max_f:
+        frames_list.append(max_f)
+
+    return trace, frames_list
+
 def make_random_trace(
     num_pages: int = 10,
     trace_length: int = 50,
