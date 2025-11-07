@@ -43,6 +43,7 @@ class LRU(PageReplacementAlgorithm):
                 if acc.write:
                     pte.M = 1
                 pte.last_used = time
+                time += 1
                 continue
 
             faults += 1
@@ -55,6 +56,7 @@ class LRU(PageReplacementAlgorithm):
                 pte.last_used = time
 
                 frames_list.append(pte)
+                time += 1
                 continue
 
             victim = min(frames_list, key=lambda x: x.last_used)
