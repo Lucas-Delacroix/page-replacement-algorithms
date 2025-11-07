@@ -18,15 +18,15 @@ def main():
     trace, frames_list = make_locality_trace(num_pages=35, trace_length=500, locality_prob=0.85, phase_length=60, working_set_size=8, seed=42)
 
     algos = [
-        # Fifo(),
-        # SecondChance(),
-        # Clock(),
-        NFU(),
+        Fifo(),
+        SecondChance(),
+        Clock(),
+        # NFU(),
         # LRU(),
-        NRU(),
+        # NRU(),
         # WorkingSet(window=4),
         # WSClock(window=4),
-        Aging(bits=8, refresh_every=1),
+        # Aging(bits=8, refresh_every=1),
         # Optimal()
     ]
     benchmarks = []
