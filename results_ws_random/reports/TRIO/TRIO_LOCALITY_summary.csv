@@ -1,4 +1,0 @@
-algo_name,avg_faults,avg_fault_rate,avg_hits,avg_hit_rate,avg_evictions,min_frames,max_frames,faults_at_minF,faults_at_maxF,Δ% vs Ótimo_faults,Δ% vs Ótimo_hits
-Ótimo,81.6,0.10200000000000001,718.4,0.898,51.6,12,48,131,56,0.0,0.0
-LRU,117.2,0.1465,682.8,0.8535,87.2,12,48,178,65,-43.62745098039217,-4.9554565701559055
-FIFO,125.4,0.15675,674.6,0.84325,95.4,12,48,214,62,-53.67647058823531,-6.096881959910907
