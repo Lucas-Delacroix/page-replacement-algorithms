@@ -14,9 +14,9 @@ from src.reports import export_benchmark_csv
 
 
 def main():
-    trace, frames_list = make_random_trace(num_pages=35, frames=None, frame_mode="auto", seed=42)
+    # trace, frames_list = make_random_trace(num_pages=35, frames=None, frame_mode="auto", seed=42)
     trace, frames_list = make_locality_trace(
-        num_pages=60,
+        num_pages=35,
         trace_length=500,
         locality_prob=0.85,
         phase_length=60,

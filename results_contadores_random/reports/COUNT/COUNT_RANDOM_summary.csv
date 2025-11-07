@@ -1,0 +1,4 @@
+algo_name,avg_faults,avg_fault_rate,avg_hits,avg_hit_rate,avg_evictions,min_frames,max_frames,faults_at_minF,faults_at_maxF,Δ% vs Ótimo_faults,Δ% vs Ótimo_hits
+Ótimo,217.8,0.27225,582.2,0.72775,187.8,12,48,400,92,0.0,0.0
+NFU,397.6,0.497,402.4,0.503,367.6,12,48,622,191,-82.55280073461891,-30.8828581243559
+Envelhecimento,401.2,0.5015000000000001,398.8,0.49850000000000005,371.2,12,48,641,179,-84.20569329660236,-31.501202335967026
