@@ -53,7 +53,9 @@ def _plot_many(
                   }[metric])
     ax.set_title(title)
     ax.grid(True, linestyle="--", linewidth=0.5)
+
     # ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+
     ax.legend(
         loc="best",
         framealpha=0.8,

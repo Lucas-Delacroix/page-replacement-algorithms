@@ -10,6 +10,8 @@ from src.algorithms.Aging import Aging
 from src.algorithms.Optimal import Optimal
 from src.core import make_random_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
+from src.reports import export_benchmark_csv
+
 
 def main():
     trace, frames_list = make_random_trace(num_pages=15, frames=None, frame_mode="auto", seed=42)
@@ -23,8 +25,8 @@ def main():
         NRU(),
         WorkingSet(window=4),
         WSClock(window=4),
-        Optimal(),
-        Aging(bits=8, refresh_every=1)
+        Aging(bits=8, refresh_every=1),
+        Optimal()
     ]
     benchmarks = []
     for algo in algos:
@@ -37,6 +39,13 @@ def main():
     plot_fault_rate(benchmarks)
     plot_hit_rate(benchmarks)
 
+    export_benchmark_csv(
+        benchmarks,
+        out_dir="results/reports",
+        summary_filename="benchmark_summary.csv",
+        detailed_filename="benchmark_detailed.csv",
+        sort_by="avg_faults",
+    )
 
 
 if __name__ == "__main__":

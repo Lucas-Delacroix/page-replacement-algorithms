@@ -44,7 +44,6 @@ class Aging(PageReplacementAlgorithm):
             idx = page_to_idx.get(pid)
 
             if idx is not None and slots[idx]["page_id"] == pid:
-                # HIT
                 hits += 1
                 slots[idx]["R"] = 1
                 if access.write:
