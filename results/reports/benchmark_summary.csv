@@ -1,4 +1,0 @@
-algo_name,avg_faults,avg_fault_rate,avg_hits,avg_hit_rate,avg_evictions,min_frames,max_frames,faults_at_minF,faults_at_maxF,Δ% vs Ótimo_faults,Δ% vs Ótimo_hits
-SecondChance,85.5,0.171,414.5,0.8290000000000001,66.66666666666667,7,28,185,41,0.0,0.0
-Clock,85.5,0.171,414.5,0.8290000000000001,66.66666666666667,7,28,185,41,0.0,0.0
-FIFO,92.5,0.18499999999999997,407.5,0.815,73.66666666666667,7,28,196,43,-8.187134502923977,-1.6887816646562124

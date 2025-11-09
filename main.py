@@ -1,39 +1,43 @@
-from src.algorithms.LRU import LRU
-from src.algorithms.NFU import NFU
-from src.algorithms.second_chance import SecondChance
 from src.algorithms.fifo import Fifo
-from src.algorithms.clock import Clock
-from src.algorithms.nru import NRU
-from src.algorithms.working_set import WorkingSet
-from src.algorithms.wsclock import WSClock
-from src.algorithms.Aging import Aging
-from src.algorithms.Optimal import Optimal
-from src.core import make_random_trace, make_locality_trace
+from src.core import make_locality_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
 from src.reports import export_benchmark_csv
+from src.trace_exporter import TraceExporter
 
 
-def main():
-    # trace, frames_list = make_random_trace(num_pages=35, frames=None, frame_mode="auto", seed=42)
-    trace, frames_list = make_locality_trace(num_pages=35, trace_length=500, locality_prob=0.85, phase_length=60, working_set_size=8, seed=42)
+def main() -> None:
+    trace, frames_list = make_locality_trace(
+        num_pages=10,
+        trace_length=40,
+        locality_prob=0.9,
+        phase_length=10,
+        working_set_size=3,
+        seed=1,
+    )
+
+    frames_list = [40]
 
     algos = [
         Fifo(),
-        SecondChance(),
-        Clock(),
-        # NFU(),
-        # LRU(),
-        # NRU(),
-        # WorkingSet(window=4),
-        # WSClock(window=4),
-        # Aging(bits=8, refresh_every=1),
-        # Optimal()
     ]
+
     benchmarks = []
+
     for algo in algos:
-        br = algo.benchmark(trace, frames_list)
+        br = algo.benchmark(
+            trace,
+            frames_list,
+        )
+
         benchmarks.append(br)
+
         algo.plot(f"{algo.name}.png")
+
+        TraceExporter.export_all(
+            algo_name=algo.name,
+            traces_by_frames=algo.last_traces,
+            out_dir="results/trace_didatico"
+        )
 
     plot_faults(benchmarks)
     plot_hits(benchmarks)
