@@ -1,7 +1,8 @@
-from typing import Iterable, Set, Dict, List
-from src.algorithms.baseAlgorithm import PageReplacementAlgorithm, RunResult
-from src.core import Access, PTE
-import matplotlib.pyplot as plt
+from typing import Dict, Iterable, List, Optional, Set
+
+from src.algorithms.baseAlgorithm import PageReplacementAlgorithm
+from src.core import Access, RunResult, PTE
+
 
 class NFU(PageReplacementAlgorithm):
     def __init__(self):
@@ -14,6 +15,8 @@ class NFU(PageReplacementAlgorithm):
         seq = self._normalize_trace(trace)
         trace_len = len(seq)
 
+        self._trace_begin(frames)
+
         all_pages = {acc.page_id for acc in seq}
         page_table: Dict[int, PTE] = {
             pid: PTE(
@@ -22,7 +25,7 @@ class NFU(PageReplacementAlgorithm):
                 R=0,
                 M=0,
                 loaded_at=None,
-                last_used=None
+                last_used=None,
             )
             for pid in all_pages
         }
@@ -32,46 +35,105 @@ class NFU(PageReplacementAlgorithm):
         frames_list: List[PTE] = []
         faults = hits = evictions = 0
         time = 0
+        fallback_t = 0
+
+        def build_frames_state() -> List[dict]:
+            frames_pte: List[Optional[PTE]] = [None] * frames
+            for pte in page_table.values():
+                if pte.frame is not None and 0 <= pte.frame < frames:
+                    frames_pte[pte.frame] = pte
+
+            state: List[dict] = []
+            for idx, slot in enumerate(frames_pte):
+                if slot is None:
+                    meta = {"count": 0}
+                    state.append(
+                        {
+                            "frame_index": idx,
+                            "page_id": None,
+                            "R": 0,
+                            "M": 0,
+                            "meta": meta,
+                        }
+                    )
+                else:
+                    meta = {"count": usage_counter.get(slot.page_id, 0)}
+                    state.append(
+                        {
+                            "frame_index": idx,
+                            "page_id": slot.page_id,
+                            "R": slot.R,
+                            "M": slot.M,
+                            "meta": meta,
+                        }
+                    )
+            return state
 
         for acc in seq:
             time += 1
+            if acc.t is not None:
+                current_t = acc.t
+            else:
+                current_t = fallback_t
+                fallback_t += 1
+
             pte = page_table[acc.page_id]
+            evicted_pid: Optional[int] = None
+            victim_pid_meta: Optional[int] = None
 
             if pte.frame is not None:
+                hit = True
                 hits += 1
                 pte.R = 1
                 if acc.write:
                     pte.M = 1
                 usage_counter[pte.page_id] += 1
                 pte.last_used = time
-                continue
+            else:
+                hit = False
+                faults += 1
 
-            faults += 1
+                if len(frames_list) < frames:
+                    pte.frame = len(frames_list)
+                    pte.R = 1
+                    pte.M = int(acc.write)
+                    pte.loaded_at = time
+                    pte.last_used = time
+                    usage_counter[pte.page_id] = 1
+                    frames_list.append(pte)
+                else:
+                    victim = min(frames_list, key=lambda x: usage_counter[x.page_id])
+                    victim_pid_meta = victim.page_id
+                    evicted_pid = victim_pid_meta
+                    evictions += 1
 
-            if len(frames_list) < frames:
-                pte.frame = len(frames_list)
-                pte.R = 1
-                pte.M = int(acc.write)
-                pte.loaded_at = time
-                pte.last_used = time
-                usage_counter[pte.page_id] = 1
-                frames_list.append(pte)
-                continue
+                    victim_frame = victim.frame
+                    frames_list.remove(victim)
+                    victim.frame = None
 
-            victim = min(frames_list, key=lambda x: usage_counter[x.page_id])
-            evictions += 1
+                    pte.frame = victim_frame
+                    pte.R = 1
+                    pte.M = int(acc.write)
+                    pte.loaded_at = time
+                    pte.last_used = time
+                    usage_counter[pte.page_id] = 1
+                    frames_list.append(pte)
 
-            victim_frame = victim.frame
-            frames_list.remove(victim)
-            victim.frame = None
+            self.trace_step(
+                t=current_t,
+                access_page=acc.page_id,
+                access_write=acc.write,
+                hit=hit,
+                evicted_page=evicted_pid,
+                frames_state=build_frames_state(),
+                decision_meta={
+                    "policy": "nfu",
+                    "frames_used": len(frames_list),
+                    "victim": victim_pid_meta,
+                },
+            )
 
-            pte.frame = victim_frame
-            pte.R = 1
-            pte.M = int(acc.write)
-            pte.loaded_at = time
-            pte.last_used = time
-            usage_counter[pte.page_id] = 1
-            frames_list.append(pte)
+        self._trace_end(frames)
 
         return RunResult(
             algo_name=self.name,

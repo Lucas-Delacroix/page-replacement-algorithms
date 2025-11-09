@@ -1,4 +1,13 @@
+from src.algorithms.LRU import LRU
+from src.algorithms.NFU import NFU
+from src.algorithms.second_chance import SecondChance
 from src.algorithms.fifo import Fifo
+from src.algorithms.clock import Clock
+from src.algorithms.nru import NRU
+from src.algorithms.working_set import WorkingSet
+from src.algorithms.wsclock import WSClock
+from src.algorithms.Aging import Aging
+from src.algorithms.Optimal import Optimal
 from src.core import make_locality_trace
 from src.plot import plot_faults, plot_hits, plot_fault_rate, plot_hit_rate
 from src.reports import export_benchmark_csv
@@ -15,10 +24,13 @@ def main() -> None:
         seed=1,
     )
 
-    frames_list = [40]
+    frames_list = [3,5]
 
     algos = [
         Fifo(),
+        Aging(),
+        WSClock(),
+        LRU()
     ]
 
     benchmarks = []
