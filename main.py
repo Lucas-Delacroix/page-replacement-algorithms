@@ -26,6 +26,13 @@ def main() -> None:
 
     frames_list = [3,5]
 
+    file = open("trace.txt", "w")
+
+    for acc in trace:
+        file.write(f"{acc.page_id} ")
+
+    file.close()
+
     algos = [
         Fifo(),
         Aging(),
